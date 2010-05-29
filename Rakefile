@@ -10,6 +10,13 @@ begin
     gem.email = "erik@hollensbe.org"
     gem.homepage = "http://github.com/erikh/rdbi-dbd-sqlite3"
     gem.authors = ["Erik Hollensbe"]
+
+    gem.add_development_dependency 'test-unit'
+    gem.add_development_dependency 'rdoc'
+
+    gem.add_dependency 'rdbi'
+    gem.add_dependency 'sqlite3-ruby'
+
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new
@@ -41,8 +48,8 @@ task :test => :check_dependencies
 
 task :default => :test
 
-require 'rake/rdoctask'
-Rake::RDocTask.new do |rdoc|
+require 'rdoc/task'
+RDoc::Task.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""
 
   rdoc.rdoc_dir = 'rdoc'
