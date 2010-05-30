@@ -10,7 +10,7 @@ require 'rdbi/driver/sqlite3'
 class Test::Unit::TestCase
 
   SQL = [
-    'create table foo (integer bar)',
+    'create table foo (bar integer)',
   ]
 
   def new_database
