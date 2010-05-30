@@ -19,6 +19,11 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
       @handle.type_translation = false # XXX RDBI should handle this.
     end
 
+    def disconnect
+      @handle.close
+      super
+    end
+
     def transaction
       @handle.transaction
       super
@@ -45,8 +50,15 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     end
 
     def new_execution(*binds)
+      rs = @handle.execute(*binds)
+      ary = rs.to_a 
       # FIXME schema, columns method.
-      return @handle.execute(*binds).to_a, RDBI::Schema.new
+      return ary, RDBI::Schema.new
+    end
+
+    def finish
+      @handle.close
+      super
     end
   end
 end
