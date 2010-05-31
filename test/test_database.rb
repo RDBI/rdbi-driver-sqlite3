@@ -94,4 +94,12 @@ class TestDatabase < Test::Unit::TestCase
     
     assert_equal([["1"]] * 5, dbh.execute("select * from foo").fetch(:all))
   end
+
+  def test_06_preprocess_query
+    self.dbh = init_database
+    assert_equal(
+      "insert into foo (bar) values (1)",
+      dbh.preprocess_query("insert into foo (bar) values (?)", 1)
+    )
+  end
 end

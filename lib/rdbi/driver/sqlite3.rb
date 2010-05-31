@@ -1,4 +1,6 @@
 require 'rdbi'
+require 'epoxy'
+require 'methlab'
 require 'sqlite3'
 
 class RDBI::Driver::SQLite3 < RDBI::Driver
@@ -35,7 +37,10 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     end
 
     def preprocess_query(query, *binds)
-      # FIXME finish
+      mutex.synchronize { @last_query = query } 
+
+      ep = Epoxy.new(query)
+      ep.quote { |x| ::SQLite3::Database.quote(binds[x].to_s) }
     end
 
     inline(:ping)     { 0 }
