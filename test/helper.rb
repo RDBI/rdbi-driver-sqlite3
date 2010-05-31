@@ -1,6 +1,7 @@
 require 'rubygems'
 gem 'test-unit'
 require 'test/unit'
+require 'fileutils'
 
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
@@ -22,5 +23,4 @@ class Test::Unit::TestCase
     SQL.each { |query| dbh.execute(query) }
     return dbh
   end
-
 end

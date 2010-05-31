@@ -68,4 +68,30 @@ class TestDatabase < Test::Unit::TestCase
     sth.finish
     sth2.finish
   end
+
+  def test_05_transaction
+    self.dbh = init_database
+
+    dbh.transaction do
+      assert(dbh.in_transaction?)
+      5.times { dbh.execute("insert into foo (bar) values (?)", 1) }
+      dbh.rollback
+      assert(!dbh.in_transaction?)
+    end
+
+    assert(!dbh.in_transaction?)
+
+    assert_equal([], dbh.execute("select * from foo").fetch(:all))
+    
+    dbh.transaction do 
+      assert(dbh.in_transaction?)
+      5.times { dbh.execute("insert into foo (bar) values (?)", 1) }
+      assert_equal([["1"]] * 5, dbh.execute("select * from foo").fetch(:all))
+      dbh.commit
+    end
+
+    assert(!dbh.in_transaction?)
+    
+    assert_equal([["1"]] * 5, dbh.execute("select * from foo").fetch(:all))
+  end
 end

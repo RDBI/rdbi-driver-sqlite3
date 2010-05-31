@@ -9,6 +9,7 @@ end
 
 class RDBI::Driver::SQLite3 < RDBI::Driver
   class Database < RDBI::Database
+    extend MethLab
 
     attr_accessor :handle
 
@@ -24,7 +25,7 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
       super
     end
 
-    def transaction
+    def transaction(&block)
       @handle.transaction
       super
     end
@@ -34,6 +35,7 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     end
 
     def preprocess_query(query, *binds)
+      # FIXME finish
     end
 
     inline(:ping)     { 0 }
@@ -42,6 +44,8 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
   end
 
   class Statement < RDBI::Statement
+    extend MethLab
+
     attr_accessor :handle
 
     def initialize(query, dbh)
