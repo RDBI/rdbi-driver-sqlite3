@@ -61,8 +61,20 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     def new_execution(*binds)
       rs = @handle.execute(*binds)
       ary = rs.to_a 
-      # FIXME schema, columns method.
-      return ary, RDBI::Schema.new
+
+      # FIXME type management
+      columns = rs.columns.zip(rs.types)
+      columns.collect! do |col|
+        newcol = RDBI::Column.new
+        newcol.name = col[0]
+        newcol.type = col[1]
+        newcol
+      end
+
+      this_schema = RDBI::Schema.new
+      this_schema.columns = columns
+
+      return ary, this_schema
     end
 
     def finish

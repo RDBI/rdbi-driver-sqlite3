@@ -102,4 +102,18 @@ class TestDatabase < Test::Unit::TestCase
       dbh.preprocess_query("insert into foo (bar) values (?)", 1)
     )
   end
+
+  def test_07_schema
+    self.dbh = init_database
+
+    dbh.execute("create table bar (foo varchar, bar integer)")
+    dbh.execute("insert into bar (foo, bar) values (?, ?)", "foo", 1)
+    res = dbh.execute("select * from bar")
+
+    assert(res)
+    assert(res.schema)
+    assert_kind_of(RDBI::Schema, res.schema)
+    assert(res.schema.columns)
+    res.schema.columns.each { |x| assert_kind_of(RDBI::Column, x) }
+  end
 end
