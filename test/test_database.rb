@@ -33,7 +33,7 @@ class TestDatabase < Test::Unit::TestCase
     res = dbh.execute("select * from foo")
     assert(res)
     assert_kind_of(RDBI::Result, res)
-    assert_equal([["1"]], res.fetch(:all))
+    assert_equal([[1]], res.fetch(:all))
   end
 
   def test_04_prepare
@@ -56,14 +56,14 @@ class TestDatabase < Test::Unit::TestCase
     res = sth2.execute
     assert(res)
     assert_kind_of(RDBI::Result, res)
-    assert_equal([["1"]] * 5, res.fetch(:all))
+    assert_equal([[1]] * 5, res.fetch(:all))
 
     sth.execute(1)
     
     res = sth2.execute
     assert(res)
     assert_kind_of(RDBI::Result, res)
-    assert_equal([["1"]] * 6, res.fetch(:all))
+    assert_equal([[1]] * 6, res.fetch(:all))
 
     sth.finish
     sth2.finish
@@ -86,13 +86,13 @@ class TestDatabase < Test::Unit::TestCase
     dbh.transaction do 
       assert(dbh.in_transaction?)
       5.times { dbh.execute("insert into foo (bar) values (?)", 1) }
-      assert_equal([["1"]] * 5, dbh.execute("select * from foo").fetch(:all))
+      assert_equal([[1]] * 5, dbh.execute("select * from foo").fetch(:all))
       dbh.commit
     end
 
     assert(!dbh.in_transaction?)
     
-    assert_equal([["1"]] * 5, dbh.execute("select * from foo").fetch(:all))
+    assert_equal([[1]] * 5, dbh.execute("select * from foo").fetch(:all))
   end
 
   def test_06_preprocess_query

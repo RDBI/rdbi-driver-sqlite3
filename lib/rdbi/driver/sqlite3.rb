@@ -54,8 +54,10 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     attr_accessor :handle
 
     def initialize(query, dbh)
-      @handle = dbh.handle.prepare(query)
       super
+      @handle = dbh.handle.prepare(query)
+      @input_type_map  = RDBI::Type.create_type_hash(RDBI::Type::In)
+      @output_type_map = RDBI::Type.create_type_hash(RDBI::Type::Out)
     end
 
     def new_execution(*binds)
@@ -68,13 +70,14 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
         newcol = RDBI::Column.new
         newcol.name = col[0]
         newcol.type = col[1]
+        newcol.ruby_type = col[1].to_sym
         newcol
       end
 
       this_schema = RDBI::Schema.new
       this_schema.columns = columns
 
-      return ary, this_schema
+      return ary, this_schema, @output_type_map
     end
 
     def finish
