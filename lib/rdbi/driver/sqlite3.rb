@@ -43,6 +43,29 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
       ep.quote { |x| ::SQLite3::Database.quote(binds[x].to_s) }
     end
 
+    def schema
+      sch = []
+      execute("SELECT name FROM sqlite_master WHERE type='table'").fetch(:all).each do |row|
+        sch << table_schema(row[0])
+      end
+      return sch
+    end
+
+    def table_schema(table_name)
+      sch = RDBI::Schema.new([], [])
+      sch.tables << table_name.to_sym
+      @handle.table_info(table_name) do |hash|
+        col = RDBI::Column.new
+        col.name       = hash['name'].to_sym
+        col.type       = hash['type'].to_sym
+        col.ruby_type  = hash['type'].to_sym
+        col.nullable   = !(hash['notnull'] == "0")
+        sch.columns << col
+      end
+
+      return sch
+    end
+
     inline(:ping)     { 0 }
     inline(:rollback) { @handle.rollback; super() }
     inline(:commit)   { @handle.commit; super()   }

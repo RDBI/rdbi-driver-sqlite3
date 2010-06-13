@@ -5,8 +5,8 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "rdbi-dbd-sqlite3"
-    gem.summary = %Q{TODO: one-line summary of your gem}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.summary = %Q{sqlite3 driver for RDBI}
+    gem.description = %Q{sqlite3 driver for RDBI}
     gem.email = "erik@hollensbe.org"
     gem.homepage = "http://github.com/erikh/rdbi-dbd-sqlite3"
     gem.authors = ["Erik Hollensbe"]

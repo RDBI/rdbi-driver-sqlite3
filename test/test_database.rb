@@ -127,4 +127,27 @@ class TestDatabase < Test::Unit::TestCase
     assert_kind_of(DateTime, dt2)
     assert_equal(dt2.to_s, dt.to_s)
   end
+
+  def test_09_basic_schema
+    self.dbh = init_database
+    assert_respond_to(dbh, :schema)
+    assert_respond_to(dbh, :table_schema)
+    schema = dbh.schema.sort_by { |x| x.tables[0].to_s }
+
+    tables = [:foo, :time_test]
+    columns = {
+      :foo => { :bar => :integer },
+      :time_test => { :my_date => :timestamp }
+    }
+
+    schema.each_with_index do |sch, x|
+      assert_kind_of(RDBI::Schema, sch)
+      assert_equal(sch.tables[0], tables[x])
+
+      sch.columns.each do |col|
+        assert_kind_of(RDBI::Column, col)
+        assert_equal(columns[tables[x]][col.name], col.type)
+      end
+    end
+  end
 end
