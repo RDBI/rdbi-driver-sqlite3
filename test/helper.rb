@@ -12,6 +12,7 @@ class Test::Unit::TestCase
 
   SQL = [
     'create table foo (bar integer)',
+    'create table time_test (my_date timestamp)',
   ]
 
   def new_database

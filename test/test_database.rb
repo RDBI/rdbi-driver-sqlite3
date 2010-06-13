@@ -116,4 +116,15 @@ class TestDatabase < Test::Unit::TestCase
     assert(res.schema.columns)
     res.schema.columns.each { |x| assert_kind_of(RDBI::Column, x) }
   end
+
+  def test_08_datetime
+    self.dbh = init_database
+
+    dt = DateTime.now
+    dbh.execute('insert into time_test (my_date) values (?)', dt)
+    dt2 = dbh.execute('select * from time_test limit 1').fetch(1)[0][0]
+
+    assert_kind_of(DateTime, dt2)
+    assert_equal(dt2.to_s, dt.to_s)
+  end
 end
