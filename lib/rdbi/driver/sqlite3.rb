@@ -44,16 +44,22 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     end
 
     def schema
-      sch = []
-      execute("SELECT name FROM sqlite_master WHERE type='table'").fetch(:all).each do |row|
-        sch << table_schema(row[0])
+      sch = { }
+      execute("SELECT name, type FROM sqlite_master WHERE type='table' or type='view'").fetch(:all).each do |row|
+        table_name_sym, table_name, table_type_sym = row[0].to_sym, row[0], row[0].to_sym
+        sch[table_name_sym] = table_schema(table_name, table_type_sym)
       end
       return sch
     end
 
-    def table_schema(table_name)
-      sch = RDBI::Schema.new([], [])
+    def table_schema(table_name, type = nil) # overloaded for performance
+      sch = RDBI::Schema.new([], [], type)
       sch.tables << table_name.to_sym
+
+      unless sch.type
+        sch.type = execute("select type from sqlite_master where type='table' or type='view'").fetch(:first)[0].to_sym
+      end
+
       @handle.table_info(table_name) do |hash|
         col = RDBI::Column.new
         col.name       = hash['name'].to_sym

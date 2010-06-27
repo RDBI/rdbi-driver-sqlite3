@@ -132,7 +132,7 @@ class TestDatabase < Test::Unit::TestCase
     self.dbh = init_database
     assert_respond_to(dbh, :schema)
     assert_respond_to(dbh, :table_schema)
-    schema = dbh.schema.sort_by { |x| x.tables[0].to_s }
+    schema = dbh.schema
 
     tables = [:foo, :time_test]
     columns = {
@@ -140,13 +140,15 @@ class TestDatabase < Test::Unit::TestCase
       :time_test => { :my_date => :timestamp }
     }
 
-    schema.each_with_index do |sch, x|
+    schema.each do |key, sch|
       assert_kind_of(RDBI::Schema, sch)
-      assert_equal(sch.tables[0], tables[x])
+      assert_equal(key, sch.tables[0])
+      assert(tables.include?(sch.tables[0]))
+      assert(tables.include?(key))
 
       sch.columns.each do |col|
         assert_kind_of(RDBI::Column, col)
-        assert_equal(columns[tables[x]][col.name], col.type)
+        assert_equal(columns[key][col.name], col.type)
       end
     end
   end
