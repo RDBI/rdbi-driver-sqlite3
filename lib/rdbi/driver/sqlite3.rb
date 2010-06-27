@@ -46,7 +46,7 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     def schema
       sch = { }
       execute("SELECT name, type FROM sqlite_master WHERE type='table' or type='view'").fetch(:all).each do |row|
-        table_name_sym, table_name, table_type_sym = row[0].to_sym, row[0], row[0].to_sym
+        table_name_sym, table_name, table_type_sym = row[0].to_sym, row[0], row[1].to_sym
         sch[table_name_sym] = table_schema(table_name, table_type_sym)
       end
       return sch

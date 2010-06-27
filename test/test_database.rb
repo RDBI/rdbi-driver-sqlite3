@@ -145,6 +145,7 @@ class TestDatabase < Test::Unit::TestCase
       assert_equal(key, sch.tables[0])
       assert(tables.include?(sch.tables[0]))
       assert(tables.include?(key))
+      assert_equal(:table, sch.type)
 
       sch.columns.each do |col|
         assert_kind_of(RDBI::Column, col)
