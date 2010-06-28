@@ -1,6 +1,6 @@
-= rdbi-dbd-sqlite3
+= SQLite3 driver for RDBI
 
-Description goes here.
+Please see the documentation in RDBI::Driver::SQLite3.
 
 == Note on Patches/Pull Requests
  

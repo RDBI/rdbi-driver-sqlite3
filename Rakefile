@@ -1,6 +1,8 @@
 require 'rubygems'
 require 'rake'
 
+version = (File.exist?('VERSION') ? File.read('VERSION') : "").chomp
+
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
@@ -52,10 +54,10 @@ task :default => :test
 
 require 'rdoc/task'
 RDoc::Task.new do |rdoc|
-  version = File.exist?('VERSION') ? File.read('VERSION') : ""
-
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title = "rdbi-dbd-sqlite3 #{version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
+
+task :install => [:test, :build]

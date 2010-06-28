@@ -14,15 +14,22 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     extend MethLab
 
     attr_accessor :handle
+    attr_threaded_accessor :open_statements
 
     def initialize(*args)
       super
       self.database_name = @connect_args[:database]
+      self.open_statements = []
       @handle = ::SQLite3::Database.new(database_name)
       @handle.type_translation = false # XXX RDBI should handle this.
     end
 
     def disconnect
+      if self.open_statements.length > 0
+        warn "[RDBI::Driver::SQLite3] Open statements during disconnection -- automatically finishing. You should fix this."
+        self.open_statements.map(&:finish)
+      end
+
       @handle.close
       super
     end
@@ -34,7 +41,9 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     end
 
     def new_statement(query)
-      Statement.new(query, self)
+      sth = Statement.new(query, self)
+      self.open_statements.push(sth) 
+      return sth
     end
 
     def preprocess_query(query, *binds)
@@ -95,13 +104,13 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
 
     def initialize(query, dbh)
       super
-      @handle = dbh.handle.prepare(query)
+      @handle = check_exception { dbh.handle.prepare(query) }
       @input_type_map  = RDBI::Type.create_type_hash(RDBI::Type::In)
       @output_type_map = RDBI::Type.create_type_hash(RDBI::Type::Out)
     end
 
     def new_execution(*binds)
-      rs = @handle.execute(*binds)
+      rs = check_exception { @handle.execute(*binds) }
       ary = rs.to_a 
 
       # FIXME type management
@@ -121,8 +130,27 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     end
 
     def finish
-      @handle.close
+      @handle.close rescue nil
+
+      mutex.synchronize do
+        dbh.open_statements.reject! { |x| x.object_id == self.object_id }
+      end
+
       super
+    end
+
+    protected
+
+    def check_exception(&block)
+      begin
+        yield
+      rescue ArgumentError => e
+        if dbh.handle.closed?
+          raise RDBI::DisconnectedError, "database is disconnected"
+        else
+          raise e
+        end
+      end
     end
   end
 end

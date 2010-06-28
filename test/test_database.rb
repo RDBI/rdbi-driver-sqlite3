@@ -167,4 +167,22 @@ class TestDatabase < Test::Unit::TestCase
       end
     end
   end
+
+  def test_10_disconnection
+    self.dbh = init_database
+    sth = dbh.prepare("select 1")
+    dbh.disconnect
+
+    methods = {:schema => [], :execute => ["select 1"], :prepare => ["select 1"]}
+    methods.each do |meth, args|
+      assert_raises(RDBI::DisconnectedError.new("database is disconnected")) do
+        dbh.send(meth, *args)
+      end
+    end
+
+    assert_raises(StandardError.new("you may not execute a finished handle")) do
+      sth.execute
+    end
+    sth.finish
+  end
 end
