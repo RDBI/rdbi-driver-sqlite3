@@ -52,12 +52,21 @@ task :test => :check_dependencies
 
 task :default => :test
 
-require 'rdoc/task'
-RDoc::Task.new do |rdoc|
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "rdbi-dbd-sqlite3 #{version}"
-  rdoc.rdoc_files.include('README*')
-  rdoc.rdoc_files.include('lib/**/*.rb')
+begin
+  require 'yard'
+  YARD::Rake::YardocTask.new do |yard|
+    yard.files   = %w[lib/**/*.rb README*]
+    yard.options = %w[--protected --private ]
+  end
+  
+  task :rdoc => [:yard]
+  task :clobber_rdoc => [:yard]
+rescue LoadError => e
+  [:rdoc, :yard, :clobber_rdoc].each do |my_task|
+    task my_task do
+      abort "YARD is not available, which is needed to generate this documentation"
+    end
+  end
 end
 
 task :install => [:test, :build]
