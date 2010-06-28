@@ -148,10 +148,11 @@ class TestDatabase < Test::Unit::TestCase
     assert_respond_to(dbh, :table_schema)
     schema = dbh.schema
 
-    tables = [:foo, :time_test]
+    tables = [:foo, :time_test, :multi_fields]
     columns = {
-      :foo => { :bar => :integer },
-      :time_test => { :my_date => :timestamp }
+      :foo          => { :bar => :integer },
+      :time_test    => { :my_date => :timestamp },
+      :multi_fields => { :foo => :integer, :bar => :varchar }
     }
 
     schema.each do |key, sch|
@@ -184,5 +185,24 @@ class TestDatabase < Test::Unit::TestCase
       sth.execute
     end
     sth.finish
+  end
+
+  def test_11_multiple_fields
+    self.dbh = init_database
+    sth = dbh.prepare("insert into multi_fields (foo, bar) values (?, ?)")
+    sth.execute(1, "foo")
+    sth.execute(2, "bar")
+    sth.finish
+
+    sth = dbh.prepare("select foo, bar from multi_fields")
+    res = sth.execute
+
+    assert(res)
+
+    assert_equal(2, res.fetch(:all).length)
+    assert_equal(2, res.fetch(:all)[0].length)
+
+    assert_equal([1, "foo"], res.fetch(1)[0])
+    assert_equal([2, "bar"], res.fetch(1)[0])
   end
 end
