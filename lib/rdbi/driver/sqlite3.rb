@@ -28,6 +28,7 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     end
 
     def transaction(&block)
+      raise RDBI::TransactionError, "already in a transaction" if in_transaction?
       @handle.transaction
       super
     end
@@ -72,9 +73,19 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
       return sch
     end
 
-    inline(:ping)     { 0 }
-    inline(:rollback) { @handle.rollback; super() }
-    inline(:commit)   { @handle.commit; super()   }
+    inline(:ping) { 0 }
+
+    def rollback
+      raise RDBI::TransactionError, "not in a transaction during rollback" unless in_transaction?
+      @handle.rollback
+      super()
+    end
+
+    def commit
+      raise RDBI::TransactionError, "not in a transaction during commit" unless in_transaction?
+      @handle.commit
+      super()
+    end
   end
 
   class Statement < RDBI::Statement

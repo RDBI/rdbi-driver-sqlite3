@@ -91,7 +91,21 @@ class TestDatabase < Test::Unit::TestCase
     end
 
     assert(!dbh.in_transaction?)
+
+    dbh.transaction do
+      assert_raises(RDBI::TransactionError.new("already in a transaction")) do
+        dbh.transaction
+      end
+    end
+
+    assert_raises(RDBI::TransactionError.new("not in a transaction during rollback")) do
+      dbh.rollback
+    end
     
+    assert_raises(RDBI::TransactionError.new("not in a transaction during commit")) do
+      dbh.commit
+    end
+
     assert_equal([[1]] * 5, dbh.execute("select * from foo").fetch(:all))
   end
 
