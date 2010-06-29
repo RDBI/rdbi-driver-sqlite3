@@ -14,24 +14,17 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     extend MethLab
 
     attr_accessor :handle
-    attr_threaded_accessor :open_statements
 
     def initialize(*args)
       super
       self.database_name = @connect_args[:database]
-      self.open_statements = []
       @handle = ::SQLite3::Database.new(database_name)
       @handle.type_translation = false # XXX RDBI should handle this.
     end
 
     def disconnect
-      if self.open_statements.length > 0
-        warn "[RDBI::Driver::SQLite3] Open statements during disconnection -- automatically finishing. You should fix this."
-        self.open_statements.map(&:finish)
-      end
-
-      @handle.close
       super
+      @handle.close
     end
 
     def transaction(&block)
@@ -42,7 +35,6 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
 
     def new_statement(query)
       sth = Statement.new(query, self)
-      self.open_statements.push(sth) 
       return sth
     end
 
@@ -131,11 +123,6 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
 
     def finish
       @handle.close rescue nil
-
-      mutex.synchronize do
-        dbh.open_statements.reject! { |x| x.object_id == self.object_id }
-      end
-
       super
     end
 
