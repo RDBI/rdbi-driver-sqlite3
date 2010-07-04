@@ -209,5 +209,18 @@ class TestDatabase < Test::Unit::TestCase
   end
 
   def test_12_reconnection
+    self.dbh = init_database
+
+    assert_nothing_raised do
+      dbh.reconnect 
+      dbh.disconnect
+      dbh.reconnect
+    end
+
+    sth = dbh.prepare("select 1")
+    $stderr.puts "You should see the next warning exactly once"
+    dbh.reconnect
+    dbh.disconnect
+    dbh.reconnect
   end
 end
