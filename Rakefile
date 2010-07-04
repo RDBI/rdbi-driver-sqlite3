@@ -6,11 +6,11 @@ version = (File.exist?('VERSION') ? File.read('VERSION') : "").chomp
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
-    gem.name = "rdbi-dbd-sqlite3"
+    gem.name = "rdbi-driver-sqlite3"
     gem.summary = %Q{sqlite3 driver for RDBI}
     gem.description = %Q{sqlite3 driver for RDBI}
     gem.email = "erik@hollensbe.org"
-    gem.homepage = "http://github.com/erikh/rdbi-dbd-sqlite3"
+    gem.homepage = "http://github.com/RDBI/rdbi-driver-sqlite3"
     gem.authors = ["Erik Hollensbe"]
 
     gem.add_development_dependency 'test-unit'
