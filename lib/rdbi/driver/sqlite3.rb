@@ -18,8 +18,12 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     def initialize(*args)
       super
       self.database_name = @connect_args[:database]
-      @handle = ::SQLite3::Database.new(database_name)
-      @handle.type_translation = false # XXX RDBI should handle this.
+      sqlite3_connect
+    end
+
+    def reconnect
+      super
+      sqlite3_connect
     end
 
     def disconnect
@@ -86,6 +90,13 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
       raise RDBI::TransactionError, "not in a transaction during commit" unless in_transaction?
       @handle.commit
       super()
+    end
+
+    protected
+
+    def sqlite3_connect
+      @handle = ::SQLite3::Database.new(database_name)
+      @handle.type_translation = false # XXX RDBI should handle this.
     end
   end
 

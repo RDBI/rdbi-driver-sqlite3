@@ -172,6 +172,7 @@ class TestDatabase < Test::Unit::TestCase
   def test_10_disconnection
     self.dbh = init_database
     sth = dbh.prepare("select 1")
+    sth.finish
     dbh.disconnect
 
     methods = {:schema => [], :execute => ["select 1"], :prepare => ["select 1"]}
@@ -204,5 +205,9 @@ class TestDatabase < Test::Unit::TestCase
 
     assert_equal([1, "foo"], res.fetch(1)[0])
     assert_equal([2, "bar"], res.fetch(1)[0])
+    sth.finish
+  end
+
+  def test_12_reconnection
   end
 end
