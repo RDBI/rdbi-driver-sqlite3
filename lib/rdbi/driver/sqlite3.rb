@@ -43,7 +43,7 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     end
 
     def preprocess_query(query, *binds)
-      mutex.synchronize { @last_query = query } 
+      mutex.synchronize { @last_query = query }
 
       ep = Epoxy.new(query)
       ep.quote { |x| ::SQLite3::Database.quote(binds[x].to_s) }
@@ -114,7 +114,7 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
 
     def new_execution(*binds)
       rs = check_exception { @handle.execute(*binds) }
-      ary = rs.to_a 
+      ary = rs.to_a
 
       # FIXME type management
       columns = rs.columns.zip(rs.types)

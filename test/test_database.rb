@@ -8,8 +8,8 @@ class TestDatabase < Test::Unit::TestCase
     @dbh.disconnect if (@dbh and @dbh.connected?)
   end
 
-  def test_01_connect 
-    self.dbh = new_database 
+  def test_01_connect
+    self.dbh = new_database
     assert(dbh)
     assert_kind_of(RDBI::Driver::SQLite3::Database, dbh)
     assert_kind_of(RDBI::Database, dbh)
@@ -29,7 +29,7 @@ class TestDatabase < Test::Unit::TestCase
     res = dbh.execute("insert into foo (bar) values (?)", 1)
     assert(res)
     assert_kind_of(RDBI::Result, res)
-    
+
     res = dbh.execute("select * from foo")
     assert(res)
     assert_kind_of(RDBI::Result, res)
@@ -52,14 +52,14 @@ class TestDatabase < Test::Unit::TestCase
     assert(sth)
     assert_kind_of(RDBI::Statement, sth)
     assert_respond_to(sth, :execute)
-   
+
     res = sth2.execute
     assert(res)
     assert_kind_of(RDBI::Result, res)
     assert_equal([[1]] * 5, res.fetch(:all))
 
     sth.execute(1)
-    
+
     res = sth2.execute
     assert(res)
     assert_kind_of(RDBI::Result, res)
@@ -82,8 +82,8 @@ class TestDatabase < Test::Unit::TestCase
     assert(!dbh.in_transaction?)
 
     assert_equal([], dbh.execute("select * from foo").fetch(:all))
-    
-    dbh.transaction do 
+
+    dbh.transaction do
       assert(dbh.in_transaction?)
       5.times { dbh.execute("insert into foo (bar) values (?)", 1) }
       assert_equal([[1]] * 5, dbh.execute("select * from foo").fetch(:all))
@@ -101,7 +101,7 @@ class TestDatabase < Test::Unit::TestCase
     assert_raises(RDBI::TransactionError.new("not in a transaction during rollback")) do
       dbh.rollback
     end
-    
+
     assert_raises(RDBI::TransactionError.new("not in a transaction during commit")) do
       dbh.commit
     end
@@ -212,7 +212,7 @@ class TestDatabase < Test::Unit::TestCase
     self.dbh = init_database
 
     assert_nothing_raised do
-      dbh.reconnect 
+      dbh.reconnect
       dbh.disconnect
       dbh.reconnect
     end
