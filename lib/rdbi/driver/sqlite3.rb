@@ -63,7 +63,8 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
       sch.tables << table_name.to_sym
 
       unless sch.type
-        sch.type = execute("select type from sqlite_master where type='table' or type='view'").fetch(1)[0][0].to_sym
+        sch.type = execute("select type from sqlite_master where (type='table' or type='view') and name=?", table_name.to_s).fetch(:first)[0].to_sym rescue nil
+        return nil unless sch.type
       end
 
       @handle.table_info(table_name) do |hash|
