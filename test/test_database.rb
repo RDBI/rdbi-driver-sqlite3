@@ -149,7 +149,6 @@ class TestDatabase < Test::Unit::TestCase
   def test_09_basic_schema
     self.dbh = init_database
     assert_respond_to(dbh, :schema)
-    assert_respond_to(dbh, :table_schema)
     schema = dbh.schema
 
     tables = [:foo, :time_test, :multi_fields]
@@ -173,7 +172,33 @@ class TestDatabase < Test::Unit::TestCase
     end
   end
 
-  def test_10_disconnection
+  def test_10_table_schema
+    self.dbh = init_database
+    assert_respond_to(dbh, :table_schema)
+
+    schema = dbh.table_schema( :foo )
+    columns = schema.columns
+    assert_equal columns.size, 1
+    c = columns[ 0 ]
+    assert_equal c.name, :bar
+    assert_equal c.type, :integer
+
+    schema = dbh.table_schema(:multi_fields)
+    columns = schema.columns
+    assert_equal columns.size, 2
+    columns.each do |c|
+      case c.name
+      when :foo
+        assert_equal :integer, c.type
+      when :bar
+        assert_equal :varchar, c.type
+      end
+    end
+
+    assert_nil dbh.table_schema(:non_existent)
+  end
+
+  def test_11_disconnection
     self.dbh = init_database
     sth = dbh.prepare("select 1")
     sth.finish
@@ -192,7 +217,7 @@ class TestDatabase < Test::Unit::TestCase
     sth.finish
   end
 
-  def test_11_multiple_fields
+  def test_12_multiple_fields
     self.dbh = init_database
     sth = dbh.prepare("insert into multi_fields (foo, bar) values (?, ?)")
     sth.execute(1, "foo")
@@ -212,7 +237,7 @@ class TestDatabase < Test::Unit::TestCase
     sth.finish
   end
 
-  def test_12_reconnection
+  def test_13_reconnection
     self.dbh = init_database
 
     assert_nothing_raised do
