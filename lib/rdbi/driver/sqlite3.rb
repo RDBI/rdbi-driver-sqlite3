@@ -120,7 +120,7 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
       columns = rs.columns.zip(rs.types)
       columns.collect! do |col|
         newcol = RDBI::Column.new
-        newcol.name = col[0]
+        newcol.name = col[0].to_sym
         newcol.type = col[1]
         newcol.ruby_type = col[1].to_sym
         newcol

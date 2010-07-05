@@ -34,6 +34,10 @@ class TestDatabase < Test::Unit::TestCase
     assert(res)
     assert_kind_of(RDBI::Result, res)
     assert_equal([[1]], res.fetch(:all))
+
+    rows = res.as(:Struct).fetch(:all)
+    row = rows[0]
+    assert_equal(1, row.bar)
   end
 
   def test_04_prepare
