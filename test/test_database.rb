@@ -38,6 +38,10 @@ class TestDatabase < Test::Unit::TestCase
     rows = res.as(:Struct).fetch(:all)
     row = rows[0]
     assert_equal(1, row.bar)
+
+    res = dbh.execute("select * from foo where bar = ?bar", { :bar => 1 })
+    assert(res)
+    assert_equal([[1]], res.fetch(:all))
   end
 
   def test_04_prepare
@@ -118,6 +122,11 @@ class TestDatabase < Test::Unit::TestCase
     assert_equal(
       "insert into foo (bar) values (1)",
       dbh.preprocess_query("insert into foo (bar) values (?)", 1)
+    )
+    
+    assert_equal(
+      "insert into foo (bar) values (1)",
+      dbh.preprocess_query("insert into foo (bar) values (?bar)", { :bar => 1 })
     )
   end
 
@@ -235,6 +244,22 @@ class TestDatabase < Test::Unit::TestCase
     assert_equal([1, "foo"], res.fetch(1)[0])
     assert_equal([2, "bar"], res.fetch(1)[0])
     sth.finish
+
+    res = dbh.execute("select foo, bar from multi_fields where foo = ? and bar = ?bar", 1, { :bar => "foo" })
+    assert(res)
+    assert_equal([[1, "foo"]], res.fetch(:all))
+    
+    res = dbh.execute("select foo, bar from multi_fields where foo = ? and bar = ?bar", { :bar => "foo" }, 1)
+    assert(res)
+    assert_equal([[1, "foo"]], res.fetch(:all))
+    
+    res = dbh.execute("select foo, bar from multi_fields where foo = ?foo and bar = ?bar", { :foo => 1, :bar => "foo" })
+    assert(res)
+    assert_equal([[1, "foo"]], res.fetch(:all))
+    
+    res = dbh.execute("select foo, bar from multi_fields where foo = ?foo and bar = ?", { :foo => 1 }, "foo")
+    assert(res)
+    assert_equal([[1, "foo"]], res.fetch(:all))
   end
 
   def test_13_reconnection

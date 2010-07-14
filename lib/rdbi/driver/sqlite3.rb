@@ -45,8 +45,11 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     def preprocess_query(query, *binds)
       mutex.synchronize { @last_query = query }
 
+      hashes, binds = binds.partition { |x| x.kind_of?(Hash) }
+      total_hash = hashes.inject({}) { |x, y| x.merge(y) }
+
       ep = Epoxy.new(query)
-      ep.quote { |x| ::SQLite3::Database.quote(binds[x].to_s) }
+      ep.quote(total_hash) { |x| ::SQLite3::Database.quote((total_hash[x] || binds[x]).to_s) }
     end
 
     def schema
@@ -108,12 +111,35 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
 
     def initialize(query, dbh)
       super
+
+      ep = Epoxy.new(query)
+      @index_map = ep.indexed_binds 
+
+      # sanitizes the query of named binds so we can use SQLite3's native
+      # binder with our extended syntax. @index_map makes a reappearance in
+      # new_execution().
+      query = ep.quote(@index_map.compact.inject({}) { |x,y| x.merge({ y => nil }) }) { '?' }
+
       @handle = check_exception { dbh.handle.prepare(query) }
       @input_type_map  = RDBI::Type.create_type_hash(RDBI::Type::In)
       @output_type_map = RDBI::Type.create_type_hash(RDBI::Type::Out)
     end
 
     def new_execution(*binds)
+
+      # XXX is there a patron saint of being too clever? I don't like this
+      # code.
+      
+      hashes, binds = binds.partition { |x| x.kind_of?(Hash) }
+      hash = hashes.inject({}) { |x, y| x.merge(y) }
+      hash.keys.each do |key| 
+        if index = @index_map.index(key)
+          binds.insert(index, hash[key])
+        end
+      end
+
+      # but this code is still ok.
+
       rs = check_exception { @handle.execute(*binds) }
       ary = rs.to_a
 
