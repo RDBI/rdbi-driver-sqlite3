@@ -19,7 +19,7 @@ begin
     gem.add_dependency 'rdbi'
     gem.add_dependency 'sqlite3-ruby'
     gem.add_dependency 'methlab'
-    gem.add_dependency 'epoxy'
+    gem.add_dependency 'epoxy', '>= 0.3.1'
 
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
