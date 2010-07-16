@@ -44,11 +44,13 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
 
     def preprocess_query(query, *binds)
       mutex.synchronize { @last_query = query }
+   
+      ep = Epoxy.new(query)
 
-      hashes, binds = binds.partition { |x| x.kind_of?(Hash) }
+      hashes = binds.select { |x| x.kind_of?(Hash) }
+      binds.collect! { |x| x.kind_of?(Hash) ? nil : x } 
       total_hash = hashes.inject({}) { |x, y| x.merge(y) }
 
-      ep = Epoxy.new(query)
       ep.quote(total_hash) { |x| ::SQLite3::Database.quote((total_hash[x] || binds[x]).to_s) }
     end
 
