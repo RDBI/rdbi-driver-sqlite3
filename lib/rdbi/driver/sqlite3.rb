@@ -150,7 +150,7 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
         newcol = RDBI::Column.new
         newcol.name = col[0].to_sym
         newcol.type = col[1]
-        newcol.ruby_type = col[1].to_sym
+        newcol.ruby_type = (col[1].to_sym rescue nil)
         newcol
       end
 

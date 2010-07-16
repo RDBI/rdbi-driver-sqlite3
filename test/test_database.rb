@@ -277,4 +277,19 @@ class TestDatabase < Test::Unit::TestCase
     dbh.disconnect
     dbh.reconnect
   end
+
+  def test_14_aggregates
+    self.dbh = init_database
+
+    res = dbh.execute("select count(*) from multi_fields")
+    assert_equal([0], res.fetch(:first))
+    
+    sth = dbh.prepare("insert into multi_fields (foo, bar) values (?, ?)")
+    sth.execute(1, "foo")
+    sth.execute(2, "bar")
+    sth.finish
+    
+    res = dbh.execute("select count(*) from multi_fields")
+    assert_equal([2], res.fetch(:first))
+  end
 end
