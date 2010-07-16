@@ -19,6 +19,9 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
       super
       self.database_name = @connect_args[:database]
       sqlite3_connect
+      @preprocess_quoter = proc do |x, named, indexed|
+        ::SQLite3::Database.quote((named[x] || indexed[x]).to_s)
+      end
     end
 
     def reconnect
@@ -40,18 +43,6 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     def new_statement(query)
       sth = Statement.new(query, self)
       return sth
-    end
-
-    def preprocess_query(query, *binds)
-      mutex.synchronize { @last_query = query }
-   
-      ep = Epoxy.new(query)
-
-      hashes = binds.select { |x| x.kind_of?(Hash) }
-      binds.collect! { |x| x.kind_of?(Hash) ? nil : x } 
-      total_hash = hashes.inject({}) { |x, y| x.merge(y) }
-
-      ep.quote(total_hash) { |x| ::SQLite3::Database.quote((total_hash[x] || binds[x]).to_s) }
     end
 
     def schema
