@@ -1,6 +1,8 @@
 require 'rdbi'
 require 'epoxy'
 require 'methlab'
+
+gem 'sqlite3-ruby', '= 1.3.1'
 require 'sqlite3'
 
 class RDBI::Driver::SQLite3 < RDBI::Driver
