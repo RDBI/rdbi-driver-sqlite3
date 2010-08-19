@@ -106,7 +106,7 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
   # used for all future operations.
   #
   class Cursor < RDBI::Cursor
-    def initialize(handle, statement)
+    def initialize(handle)
       super(handle)
       coerce_to_array_if_closed
       @index = 0
@@ -262,7 +262,7 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
       this_schema = RDBI::Schema.new
       this_schema.columns = columns
 
-      return Cursor.new(rs, @handle), this_schema, @output_type_map
+      return Cursor.new(rs), this_schema, @output_type_map
     end
 
     def finish
