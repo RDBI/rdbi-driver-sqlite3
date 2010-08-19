@@ -98,6 +98,117 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
       @handle.type_translation = false # XXX RDBI should handle this.
     end
   end
+ 
+  #
+  # Because SQLite3's ruby implementation does not support everything that our
+  # cursor implementation does, some methods, when called, will fetch the
+  # entire result set. In the instance this is done, the resulting array is
+  # used for all future operations.
+  #
+  class Cursor < RDBI::Cursor
+    def initialize(handle, statement)
+      super(handle)
+      coerce_to_array_if_closed
+      @index = 0
+    end
+
+    def fetch(count=1)
+      coerce_to_array_if_closed
+      return [] if last_row?
+      a = []
+      count.times { a.push(next_row) }
+      return a
+    end
+
+    def next_row
+      coerce_to_array_if_closed
+      val = if @array_handle
+              @array_handle[@index]
+            else
+              @handle.next
+            end
+
+      @index += 1
+      val
+    end
+
+    def result_count
+      coerce_to_array
+      @array_handle.size
+    end
+
+    def affected_count
+      # sqlite3-ruby does not support affected counts
+      0
+    end
+
+    def first
+      coerce_to_array_if_closed
+      if @array_handle
+        @array_handle.first
+      else
+        @handle.first
+      end
+    end
+
+    def last
+      coerce_to_array
+      @array_handle[-1]
+    end
+
+    def rest
+      coerce_to_array
+      oindex, @index = @index, @array_handle.size
+      @array_handle[oindex, @index]
+    end
+
+    def all
+      coerce_to_array
+      @array_handle.dup
+    end
+
+    def [](index)
+      coerce_to_array
+      @array_handle[index]
+    end
+    
+    def last_row?
+      coerce_to_array_if_closed
+      if @array_handle
+        @index == @array_handle.size
+      else
+        @handle.eof?
+      end
+    end
+
+    def rewind
+      @index = 0
+      @handle.reset unless @handle.closed?
+    end
+
+    def empty?
+      coerce_to_array
+      @array_handle.empty?
+    end
+
+    def finish
+      @handle.close unless @handle.closed?
+    end
+
+    protected
+
+    def coerce_to_array
+      unless @array_handle
+        @array_handle = @handle.to_a
+      end
+    end
+
+    def coerce_to_array_if_closed
+      if @handle.closed?
+        coerce_to_array
+      end
+    end
+  end
 
   class Statement < RDBI::Statement
     extend MethLab
@@ -137,7 +248,6 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
       # but this code is still ok.
 
       rs = check_exception { @handle.execute(*binds) }
-      ary = rs.to_a
 
       # FIXME type management
       columns = rs.columns.zip(rs.types)
@@ -152,7 +262,7 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
       this_schema = RDBI::Schema.new
       this_schema.columns = columns
 
-      return ary, this_schema, @output_type_map
+      return Cursor.new(rs, @handle), this_schema, @output_type_map
     end
 
     def finish
