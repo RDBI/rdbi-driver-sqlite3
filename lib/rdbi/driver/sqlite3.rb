@@ -108,12 +108,10 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
   class Cursor < RDBI::Cursor
     def initialize(handle)
       super(handle)
-      coerce_to_array_if_closed
       @index = 0
     end
 
     def fetch(count=1)
-      coerce_to_array_if_closed
       return [] if last_row?
       a = []
       count.times { a.push(next_row) }
@@ -121,7 +119,6 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     end
 
     def next_row
-      coerce_to_array_if_closed
       val = if @array_handle
               @array_handle[@index]
             else
@@ -143,7 +140,6 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     end
 
     def first
-      coerce_to_array_if_closed
       if @array_handle
         @array_handle.first
       else
@@ -173,7 +169,6 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     end
     
     def last_row?
-      coerce_to_array_if_closed
       if @array_handle
         @index == @array_handle.size
       else
@@ -194,18 +189,10 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     def finish
       @handle.close unless @handle.closed?
     end
-
-    protected
-
+    
     def coerce_to_array
       unless @array_handle
         @array_handle = @handle.to_a
-      end
-    end
-
-    def coerce_to_array_if_closed
-      if @handle.closed?
-        coerce_to_array
       end
     end
   end
