@@ -202,6 +202,16 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
 
     attr_accessor :handle
 
+    class << self
+      def input_type_map  
+        @input_type_map  ||= RDBI::Type.create_type_hash(RDBI::Type::In)
+      end
+
+      def output_type_map
+        @output_type_map ||= RDBI::Type.create_type_hash(RDBI::Type::Out)
+      end
+    end
+
     def initialize(query, dbh)
       super
 
@@ -214,8 +224,8 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
       query = ep.quote(@index_map.compact.inject({}) { |x,y| x.merge({ y => nil }) }) { '?' }
 
       @handle = check_exception { dbh.handle.prepare(query) }
-      @input_type_map  = RDBI::Type.create_type_hash(RDBI::Type::In)
-      @output_type_map = RDBI::Type.create_type_hash(RDBI::Type::Out)
+      @input_type_map  = self.class.input_type_map 
+      @output_type_map = self.class.output_type_map
     end
 
     def new_modification(*binds)
