@@ -219,14 +219,7 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     end
 
     def new_modification(*binds)
-      # FIXME move to RDBI::Util or something.
-      hashes, binds = binds.partition { |x| x.kind_of?(Hash) }
-      hash = hashes.inject({}) { |x, y| x.merge(y) }
-      hash.keys.each do |key| 
-        if index = @index_map.index(key)
-          binds.insert(index, hash[key])
-        end
-      end
+      binds = RDBI::Util.index_binds(binds, @index_map) 
 
       rs = check_exception { @handle.execute(*binds) }
 
@@ -234,20 +227,7 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     end
 
     def new_execution(*binds)
-
-      # XXX is there a patron saint of being too clever? I don't like this
-      # code.
-      
-      # FIXME move to RDBI::Util or something.
-      hashes, binds = binds.partition { |x| x.kind_of?(Hash) }
-      hash = hashes.inject({}) { |x, y| x.merge(y) }
-      hash.keys.each do |key| 
-        if index = @index_map.index(key)
-          binds.insert(index, hash[key])
-        end
-      end
-
-      # but this code is still ok.
+      binds = RDBI::Util.index_binds(binds, @index_map)
 
       rs = check_exception { @handle.execute(*binds) }
 

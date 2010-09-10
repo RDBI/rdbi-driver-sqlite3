@@ -226,43 +226,7 @@ class TestDatabase < Test::Unit::TestCase
     sth.finish
   end
 
-  def test_12_multiple_fields
-    self.dbh = init_database
-    sth = dbh.prepare("insert into multi_fields (foo, bar) values (?, ?)")
-    sth.execute(1, "foo")
-    sth.execute(2, "bar")
-    sth.finish
-
-    sth = dbh.prepare("select foo, bar from multi_fields")
-    res = sth.execute
-
-    assert(res)
-
-    assert_equal(2, res.fetch(:all).length)
-    assert_equal(2, res.fetch(:all)[0].length)
-
-    assert_equal([1, "foo"], res.fetch(1)[0])
-    assert_equal([2, "bar"], res.fetch(1)[0])
-    sth.finish
-
-    res = dbh.execute("select foo, bar from multi_fields where foo = ? and bar = ?bar", 1, { :bar => "foo" })
-    assert(res)
-    assert_equal([[1, "foo"]], res.fetch(:all))
-    
-    res = dbh.execute("select foo, bar from multi_fields where foo = ? and bar = ?bar", { :bar => "foo" }, 1)
-    assert(res)
-    assert_equal([[1, "foo"]], res.fetch(:all))
-    
-    res = dbh.execute("select foo, bar from multi_fields where foo = ?foo and bar = ?bar", { :foo => 1, :bar => "foo" })
-    assert(res)
-    assert_equal([[1, "foo"]], res.fetch(:all))
-    
-    res = dbh.execute("select foo, bar from multi_fields where foo = ?foo and bar = ?", { :foo => 1 }, "foo")
-    assert(res)
-    assert_equal([[1, "foo"]], res.fetch(:all))
-  end
-
-  def test_13_reconnection
+  def test_12_reconnection
     self.dbh = init_database
 
     assert_nothing_raised do
@@ -278,7 +242,7 @@ class TestDatabase < Test::Unit::TestCase
     dbh.reconnect
   end
 
-  def test_14_aggregates
+  def test_13_aggregates
     self.dbh = init_database
 
     res = dbh.execute("select count(*) from multi_fields")
