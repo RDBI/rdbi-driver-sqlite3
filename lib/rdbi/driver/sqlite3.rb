@@ -130,6 +130,7 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     end
 
     def result_count
+      return 0 unless rewindable_result
       coerce_to_array
       @array_handle.size
     end
@@ -153,14 +154,24 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     end
 
     def rest
-      coerce_to_array
-      oindex, @index = @index, @array_handle.size
-      @array_handle[oindex, @index]
+      if rewindable_result
+        rewind
+        coerce_to_array
+        oindex, @index = @index, @array_handle.size
+        @array_handle[oindex, @index]
+      else
+        @handle.to_a
+      end
     end
 
     def all
-      coerce_to_array
-      @array_handle.dup
+      if rewindable_result
+        rewind
+        coerce_to_array
+        @array_handle
+      else
+        @handle.to_a
+      end
     end
 
     def [](index)
@@ -177,6 +188,8 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     end
 
     def rewind
+      # FIXME better exception
+      raise StandardError, "rewindable_result is not true" unless rewindable_result
       @index = 0
       @handle.reset unless @handle.closed?
     end
@@ -191,8 +204,10 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     end
     
     def coerce_to_array
-      unless @array_handle
+      unless @coerced 
+        rewind
         @array_handle = @handle.to_a
+        @coerced = true
       end
     end
   end
@@ -226,6 +241,8 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
       @handle = check_exception { dbh.handle.prepare(query) }
       @input_type_map  = self.class.input_type_map 
       @output_type_map = self.class.output_type_map
+
+      prep_finalizer { @handle.close unless @handle.closed? }
     end
 
     def new_modification(*binds)
@@ -255,11 +272,6 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
       this_schema.columns = columns
 
       return Cursor.new(rs), this_schema, @output_type_map
-    end
-
-    def finish
-      @handle.close rescue nil
-      super
     end
 
     protected
