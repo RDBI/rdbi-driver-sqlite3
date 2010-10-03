@@ -236,10 +236,8 @@ class TestDatabase < Test::Unit::TestCase
     end
 
     sth = dbh.prepare("select 1")
-    $stderr.puts "You should see the next warning exactly once"
     dbh.reconnect
-    dbh.disconnect
-    dbh.reconnect
+    assert sth.finished?
   end
 
   def test_13_aggregates
