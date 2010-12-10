@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Erik Hollensbe"]
-  s.date = %q{2010-10-03}
+  s.date = %q{2010-12-10}
   s.description = %q{sqlite3 driver for RDBI}
   s.email = %q{erik@hollensbe.org}
   s.extra_rdoc_files = [
@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
      "README.rdoc",
      "Rakefile",
      "VERSION",
+     "lib/rdbi-driver-sqlite3.rb",
      "lib/rdbi/driver/sqlite3.rb",
      "rdbi-driver-sqlite3.gemspec",
      "test/helper.rb",
@@ -46,14 +47,14 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<test-unit>, [">= 0"])
       s.add_development_dependency(%q<rdoc>, [">= 0"])
       s.add_runtime_dependency(%q<rdbi>, [">= 0"])
-      s.add_runtime_dependency(%q<sqlite3-ruby>, ["= 1.3.1"])
+      s.add_runtime_dependency(%q<sqlite3-ruby>, ["~> 1.3"])
       s.add_runtime_dependency(%q<methlab>, [">= 0"])
       s.add_runtime_dependency(%q<epoxy>, [">= 0.3.1"])
     else
       s.add_dependency(%q<test-unit>, [">= 0"])
       s.add_dependency(%q<rdoc>, [">= 0"])
       s.add_dependency(%q<rdbi>, [">= 0"])
-      s.add_dependency(%q<sqlite3-ruby>, ["= 1.3.1"])
+      s.add_dependency(%q<sqlite3-ruby>, ["~> 1.3"])
       s.add_dependency(%q<methlab>, [">= 0"])
       s.add_dependency(%q<epoxy>, [">= 0.3.1"])
     end
@@ -61,7 +62,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<test-unit>, [">= 0"])
     s.add_dependency(%q<rdoc>, [">= 0"])
     s.add_dependency(%q<rdbi>, [">= 0"])
-    s.add_dependency(%q<sqlite3-ruby>, ["= 1.3.1"])
+    s.add_dependency(%q<sqlite3-ruby>, ["~> 1.3"])
     s.add_dependency(%q<methlab>, [">= 0"])
     s.add_dependency(%q<epoxy>, [">= 0.3.1"])
   end

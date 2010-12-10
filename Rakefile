@@ -17,7 +17,7 @@ begin
     gem.add_development_dependency 'rdoc'
 
     gem.add_dependency 'rdbi'
-    gem.add_dependency 'sqlite3-ruby', '= 1.3.1'
+    gem.add_dependency 'sqlite3-ruby', '~> 1.3'
     gem.add_dependency 'methlab'
     gem.add_dependency 'epoxy', '>= 0.3.1'
 
