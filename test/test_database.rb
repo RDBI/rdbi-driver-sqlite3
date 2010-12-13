@@ -120,12 +120,12 @@ class TestDatabase < Test::Unit::TestCase
   def test_06_preprocess_query
     self.dbh = init_database
     assert_equal(
-      "insert into foo (bar) values (1)",
+      "insert into foo (bar) values ('1')",
       dbh.preprocess_query("insert into foo (bar) values (?)", 1)
     )
     
     assert_equal(
-      "insert into foo (bar) values (1)",
+      "insert into foo (bar) values ('1')",
       dbh.preprocess_query("insert into foo (bar) values (?bar)", { :bar => 1 })
     )
   end
@@ -253,5 +253,15 @@ class TestDatabase < Test::Unit::TestCase
     
     res = dbh.execute("select count(*) from multi_fields")
     assert_equal([2], res.fetch(:first))
+  end
+
+  def test_14_quote
+    self.dbh = init_database
+
+    assert_equal(%q['1'], dbh.quote('1'))
+    assert_equal(%q['f'], dbh.quote(false))
+    assert_equal(%q['t'], dbh.quote(true))
+    assert_equal(%q[NULL], dbh.quote(nil))
+    assert_equal(%q['shit'], dbh.quote('shit'))
   end
 end

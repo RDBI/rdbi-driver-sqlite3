@@ -1,7 +1,7 @@
 require 'rdbi'
 require 'epoxy'
-require 'methlab'
 
+gem 'sqlite3-ruby'
 require 'sqlite3'
 
 class RDBI::Driver::SQLite3 < RDBI::Driver
@@ -12,8 +12,6 @@ end
 
 class RDBI::Driver::SQLite3 < RDBI::Driver
   class Database < RDBI::Database
-    extend MethLab
-
     attr_accessor :handle
 
     def initialize(*args)
@@ -21,7 +19,7 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
       self.database_name = @connect_args[:database]
       sqlite3_connect
       @preprocess_quoter = proc do |x, named, indexed|
-        ::SQLite3::Database.quote((named[x] || indexed[x]).to_s)
+        quote((named[x] || indexed[x]).to_s)
       end
     end
 
@@ -66,17 +64,20 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
 
       @handle.table_info(table_name) do |hash|
         col = RDBI::Column.new
-        col.name       = hash['name'].to_sym
-        col.type       = hash['type'].to_sym
-        col.ruby_type  = hash['type'].to_sym
-        col.nullable   = !(hash['notnull'] == "0")
+        col.name         = hash['name'].to_sym
+        col.type         = hash['type'].to_sym
+        col.ruby_type    = hash['type'].to_sym
+        col.nullable     = !(hash['notnull'] == "0")
+        col.primary_key  = !(hash['pk'] == "0")
         sch.columns << col
       end
 
       return sch
     end
 
-    inline(:ping) { 0 }
+    def ping
+      0
+    end
 
     def rollback
       raise RDBI::TransactionError, "not in a transaction during rollback" unless in_transaction?
@@ -88,6 +89,21 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
       raise RDBI::TransactionError, "not in a transaction during commit" unless in_transaction?
       @handle.commit
       super()
+    end
+
+    def quote(item)
+      case item
+      when NilClass
+        'NULL'
+      when true
+        "'t'"
+      when false
+        "'f'"
+      when Numeric
+        item
+      else
+        "'#{::SQLite3::Database.quote(item)}'"
+      end
     end
 
     protected
@@ -212,8 +228,6 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
   end
 
   class Statement < RDBI::Statement
-    extend MethLab
-
     attr_accessor :handle
 
     class << self
