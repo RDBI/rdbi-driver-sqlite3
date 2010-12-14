@@ -100,7 +100,7 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
       when false
         "'f'"
       when Numeric
-        item
+        item.to_s
       else
         "'#{::SQLite3::Database.quote(item)}'"
       end

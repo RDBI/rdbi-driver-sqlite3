@@ -258,7 +258,7 @@ class TestDatabase < Test::Unit::TestCase
   def test_14_quote
     self.dbh = init_database
 
-    assert_equal(%q['1'], dbh.quote('1'))
+    assert_equal(%q[1], dbh.quote(1))
     assert_equal(%q['f'], dbh.quote(false))
     assert_equal(%q['t'], dbh.quote(true))
     assert_equal(%q[NULL], dbh.quote(nil))
