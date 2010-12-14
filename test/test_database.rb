@@ -263,5 +263,6 @@ class TestDatabase < Test::Unit::TestCase
     assert_equal(%q['t'], dbh.quote(true))
     assert_equal(%q[NULL], dbh.quote(nil))
     assert_equal(%q['shit'], dbh.quote('shit'))
+    assert_equal(%q['shit''t'], dbh.quote('shit\'t'))
   end
 end
