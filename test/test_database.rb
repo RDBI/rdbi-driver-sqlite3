@@ -167,16 +167,14 @@ class TestDatabase < Test::Unit::TestCase
       :multi_fields => { :foo => :integer, :bar => :varchar }
     }
 
-    schema.each do |key, sch|
+    schema.each do |sch|
       assert_kind_of(RDBI::Schema, sch)
-      assert_equal(key, sch.tables[0])
       assert(tables.include?(sch.tables[0]))
-      assert(tables.include?(key))
       assert_equal(:table, sch.type)
 
       sch.columns.each do |col|
         assert_kind_of(RDBI::Column, col)
-        assert_equal(columns[key][col.name], col.type)
+        assert_equal(columns[sch.tables[0]][col.name], col.type)
       end
     end
   end
