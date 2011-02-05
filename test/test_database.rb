@@ -101,16 +101,16 @@ class TestDatabase < Test::Unit::TestCase
     assert(!dbh.in_transaction?)
 
     dbh.transaction do
-      assert_raises(RDBI::TransactionError.new("already in a transaction")) do
+      assert_raises(RDBI::TransactionError) do
         dbh.transaction
       end
     end
 
-    assert_raises(RDBI::TransactionError.new("not in a transaction during rollback")) do
+    assert_raises(RDBI::TransactionError) do
       dbh.rollback
     end
 
-    assert_raises(RDBI::TransactionError.new("not in a transaction during commit")) do
+    assert_raises(RDBI::TransactionError) do
       dbh.commit
     end
 
@@ -213,12 +213,12 @@ class TestDatabase < Test::Unit::TestCase
 
     methods = {:schema => [], :execute => ["select 1"], :prepare => ["select 1"]}
     methods.each do |meth, args|
-      assert_raises(RDBI::DisconnectedError.new("database is disconnected")) do
+      assert_raises(RDBI::DisconnectedError) do
         dbh.send(meth, *args)
       end
     end
 
-    assert_raises(StandardError.new("you may not execute a finished handle")) do
+    assert_raises(StandardError) do
       sth.execute
     end
     sth.finish
