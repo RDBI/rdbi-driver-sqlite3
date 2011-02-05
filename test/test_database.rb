@@ -193,12 +193,12 @@ class TestDatabase < Test::Unit::TestCase
     schema = dbh.table_schema(:multi_fields)
     columns = schema.columns
     assert_equal columns.size, 2
-    columns.each do |c|
-      case c.name
+    columns.each do |col|
+      case col.name
       when :foo
-        assert_equal :integer, c.type
+        assert_equal :integer, col.type
       when :bar
-        assert_equal :varchar, c.type
+        assert_equal :varchar, col.type
       end
     end
 

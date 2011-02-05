@@ -124,6 +124,7 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
     def initialize(handle)
       super(handle)
       @index = 0
+      @array_handle = nil
     end
 
     def fetch(count=1)
