@@ -1,10 +1,10 @@
 require 'rdbi'
 require 'epoxy'
-
-gem 'sqlite3-ruby'
 require 'sqlite3'
 
 class RDBI::Driver::SQLite3 < RDBI::Driver
+  VERSION = "1.0.0"
+
   def initialize(*args)
     super(Database, *args)
   end
@@ -46,7 +46,7 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
 
     def schema
       sch = [ ]
-      execute("SELECT name, type FROM sqlite_master WHERE type='table' or type='view'").fetch(:all).each do |row|
+      execute("SELECT distinct name, type FROM sqlite_master WHERE type='table' or type='view'").fetch(:all).each do |row|
         table_name_sym, table_name, table_type_sym = row[0].to_sym, row[0], row[1].to_sym
         sch.push table_schema(table_name, table_type_sym)
       end

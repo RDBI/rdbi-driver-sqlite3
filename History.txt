@@ -1,0 +1,7 @@
+=== 1.0.0 / 2011-02-05
+
+* Removed k/v schema management
+* Better quoting test.
+* Fix for numeric quoting.
+* supporting quote and primary key attributes. 
+* fully gutted methlab. 

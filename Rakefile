@@ -1,71 +1,45 @@
+# -*- ruby -*-
+
 require 'rubygems'
-require 'rake'
+require 'hoe'
 
-version = (File.exist?('VERSION') ? File.read('VERSION') : "").chomp
+Hoe.plugins.delete :rubyforge
+Hoe.plugin :git
+Hoe.plugin :rcov
+Hoe.plugin :roodi
+Hoe.plugin :reek
 
-begin
-  require 'jeweler'
-  Jeweler::Tasks.new do |gem|
-    gem.name = "rdbi-driver-sqlite3"
-    gem.summary = %Q{sqlite3 driver for RDBI}
-    gem.description = %Q{sqlite3 driver for RDBI}
-    gem.email = "erik@hollensbe.org"
-    gem.homepage = "http://github.com/RDBI/rdbi-driver-sqlite3"
-    gem.authors = ["Erik Hollensbe"]
+spec = Hoe.spec 'rdbi-driver-sqlite3' do
+  developer 'Erik Hollensbe', 'erik@hollensbe.org'
 
-    gem.add_development_dependency 'test-unit'
-    gem.add_development_dependency 'rdoc'
+  self.rubyforge_name = nil
 
-    gem.add_dependency 'rdbi'
-    gem.add_dependency 'sqlite3-ruby', '~> 1.3'
-    gem.add_dependency 'epoxy', '>= 0.3.1'
+  self.description = <<-EOF
+  This is the SQLite3 driver for RDBI.
 
-    # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
-  end
-  Jeweler::GemcutterTasks.new
-rescue LoadError
-  puts "Jeweler (or a dependency) not available. Install it with: gem install jeweler"
-end
+  RDBI is a database interface built out of small parts. A micro framework for
+  databases, RDBI works with and extends libraries like 'typelib' and 'epoxy'
+  to provide type conversion and binding facilities. Via a driver/adapter
+  system it provides database access. RDBI itself provides pooling and other
+  enhanced database features.
+  EOF
 
-require 'rake/testtask'
-Rake::TestTask.new(:test) do |test|
-  test.libs << 'lib' << 'test'
-  test.pattern = 'test/**/test_*.rb'
-  test.verbose = true
-end
-
-begin
-  require 'rcov/rcovtask'
-  Rcov::RcovTask.new do |test|
-    test.libs << 'test'
-    test.pattern = 'test/**/test_*.rb'
-    test.verbose = true
-  end
-rescue LoadError
-  task :rcov do
-    abort "RCov is not available. In order to run rcov, you must: sudo gem install spicycode-rcov"
-  end
-end
-
-task :test => :check_dependencies
-
-task :default => :test
-
-begin
-  require 'yard'
-  YARD::Rake::YardocTask.new do |yard|
-    yard.files   = %w[lib/**/*.rb README*]
-    yard.options = %w[--protected --private ]
-  end
+  self.summary = 'SQLite3 driver for RDBI';
+  self.url = %w[http://github.com/rdbi/rdbi-driver-sqlite3]
   
-  task :rdoc => [:yard]
-  task :clobber_rdoc => [:yard]
-rescue LoadError => e
-  [:rdoc, :yard, :clobber_rdoc].each do |my_task|
-    task my_task do
-      abort "YARD is not available, which is needed to generate this documentation"
-    end
-  end
+  require_ruby_version ">= 1.8.7"
+
+  extra_dev_deps << ['hoe-roodi']
+  extra_dev_deps << ['hoe-reek']
+  extra_dev_deps << ['minitest']
+
+  extra_deps << ['rdbi']
+  extra_deps << ['sqlite3'] 
+
+  desc "install a gem without sudo"
 end
 
-task :install => [:test, :build]
+task :install => [:gem] do
+  sh "gem install pkg/#{spec.name}-#{spec.version}.gem"
+end
+# vim: syntax=ruby

@@ -1,0 +1,8 @@
+.document
+LICENSE
+README.txt
+Rakefile
+lib/rdbi-driver-sqlite3.rb
+lib/rdbi/driver/sqlite3.rb
+test/helper.rb
+test/test_database.rb
