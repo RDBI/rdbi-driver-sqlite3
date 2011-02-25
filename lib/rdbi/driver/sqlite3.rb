@@ -110,7 +110,6 @@ class RDBI::Driver::SQLite3 < RDBI::Driver
 
     def sqlite3_connect
       @handle = ::SQLite3::Database.new(database_name)
-      @handle.type_translation = false # XXX RDBI should handle this.
     end
   end
  
